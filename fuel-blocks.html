@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fuel Blocks</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e0d;
+    --surface: #1a1917;
+    --surface2: #232220;
+    --border: #2e2c29;
+    --text: #e8e4dc;
+    --muted: #7a756c;
+    --dim: #3d3a35;
+
+    --interest: #4a9e7a;
+    --interest-bg: #0d2018;
+    --interest-border: #1d4a33;
+    --interest-light: #6ec49a;
+
+    --challenge: #7b6fd4;
+    --challenge-bg: #13102a;
+    --challenge-border: #2d2660;
+    --challenge-light: #a399e8;
+
+    --novelty: #c97a4a;
+    --novelty-bg: #271508;
+    --novelty-border: #5a3015;
+    --novelty-light: #e8a070;
+
+    --urgency: #c4943a;
+    --urgency-bg: #221a05;
+    --urgency-border: #513e0e;
+    --urgency-light: #e8bc6a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px 80px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+
+  .wordmark {
+    font-family: 'DM Serif Display', serif;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(42px, 8vw, 72px);
+    font-weight: 400;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 14px;
+    font-weight: 300;
+    letter-spacing: 0.01em;
+  }
+
+  .main {
+    width: 100%;
+    max-width: 680px;
+  }
+
+  .step-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 40px;
+  }
+
+  .pill {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 10px 20px;
+    border: 0.5px solid var(--border);
+    border-radius: 100px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    letter-spacing: 0.01em;
+  }
+
+  .pill:hover {
+    border-color: var(--dim);
+    color: var(--text);
+  }
+
+  .pill.active-topic {
+    background: var(--surface2);
+    border-color: var(--text);
+    color: var(--text);
+  }
+
+  .pill.active-interest {
+    background: var(--interest-bg);
+    border-color: var(--interest-border);
+    color: var(--interest-light);
+  }
+  .pill.active-challenge {
+    background: var(--challenge-bg);
+    border-color: var(--challenge-border);
+    color: var(--challenge-light);
+  }
+  .pill.active-novelty {
+    background: var(--novelty-bg);
+    border-color: var(--novelty-border);
+    color: var(--novelty-light);
+  }
+  .pill.active-urgency {
+    background: var(--urgency-bg);
+    border-color: var(--urgency-border);
+    color: var(--urgency-light);
+  }
+
+  .divider {
+    width: 32px;
+    height: 0.5px;
+    background: var(--border);
+    margin-bottom: 40px;
+  }
+
+  .card-wrap {
+    position: relative;
+  }
+
+  .block-card {
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.3s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .block-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .card-interest::before { background: var(--interest); }
+  .card-challenge::before { background: var(--challenge); }
+  .card-novelty::before { background: var(--novelty); }
+  .card-urgency::before { background: var(--urgency); }
+
+  .card-fuel-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tag-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .tag-interest { color: var(--interest-light); }
+  .tag-interest .tag-dot { background: var(--interest); }
+  .tag-challenge { color: var(--challenge-light); }
+  .tag-challenge .tag-dot { background: var(--challenge); }
+  .tag-novelty { color: var(--novelty-light); }
+  .tag-novelty .tag-dot { background: var(--novelty); }
+  .tag-urgency { color: var(--urgency-light); }
+  .tag-urgency .tag-dot { background: var(--urgency); }
+
+  .block-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.25;
+    margin-bottom: 14px;
+    letter-spacing: -0.01em;
+  }
+
+  .block-desc {
+    font-size: 15px;
+    color: #b0aa9f;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 0.5px solid var(--border);
+  }
+
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border-radius: 6px;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.16s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn:hover { border-color: var(--dim); color: var(--text); }
+
+  .btn-refresh { }
+
+  .btn-remove {
+    margin-left: auto;
+    color: #6b3a3a;
+    border-color: #3a2020;
+  }
+  .btn-remove:hover { color: #e07070; border-color: #7a3030; background: #1a0a0a; }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 32px;
+    border: 0.5px dashed var(--border);
+    border-radius: 12px;
+    color: var(--muted);
+  }
+
+  .empty-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--dim);
+    margin-bottom: 10px;
+  }
+
+  .empty-desc { font-size: 13px; font-weight: 300; }
+
+  .prompt-state {
+    text-align: center;
+    padding: 64px 32px;
+    color: var(--muted);
+  }
+
+  .prompt-glyph {
+    font-family: 'DM Serif Display', serif;
+    font-size: 48px;
+    color: var(--dim);
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .prompt-text { font-size: 14px; font-weight: 300; }
+
+  .manage-section {
+    margin-top: 48px;
+    border-top: 0.5px solid var(--border);
+    padding-top: 32px;
+  }
+
+  .manage-toggle {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.16s;
+  }
+
+  .manage-toggle:hover { color: var(--text); }
+
+  .manage-body {
+    margin-top: 24px;
+  }
+
+  .add-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px;
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    margin-bottom: 28px;
+  }
+
+  .add-form select, .add-form input, .add-form textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.16s;
+    width: 100%;
+  }
+
+  .add-form select:focus, .add-form input:focus, .add-form textarea:focus {
+    border-color: var(--dim);
+  }
+
+  .add-form textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
+
+  .add-form select option { background: var(--surface2); }
+
+  .form-row { display: flex; gap: 10px; }
+  .form-row select { flex: 1; }
+
+  .btn-add {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: 0.5px solid var(--interest-border);
+    background: var(--interest-bg);
+    color: var(--interest-light);
+    cursor: pointer;
+    transition: all 0.16s;
+    align-self: flex-start;
+  }
+
+  .btn-add:hover { border-color: var(--interest); }
+
+  .all-blocks-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    font-size: 13px;
+  }
+
+  .list-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .list-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+    min-width: 140px;
+  }
+
+  .list-title { flex: 1; color: #a09a90; }
+
+  .list-remove {
+    background: none;
+    border: none;
+    color: var(--dim);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.14s;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .list-remove:hover { color: #e07070; background: #1a0a0a; }
+
+  .list-filter {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 100px;
+    border: 0.5px solid var(--border);
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.14s;
+  }
+
+  .filter-btn.active { border-color: var(--dim); color: var(--text); background: var(--surface2); }
+
+  .count-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">Fuel Blocks</div>
+  <h1>What's your<br><em>fuel today?</em></h1>
+  <p class="subtitle">Pick a topic. Pick a fuel. Get to work.</p>
+</header>
+
+<div class="main">
+
+  <div class="step-label">01 — Topic</div>
+  <div class="pill-group" id="topic-group">
+    <button class="pill" onclick="selectTopic('writing')">Writing</button>
+    <button class="pill" onclick="selectTopic('editing')">Editing</button>
+    <button class="pill" onclick="selectTopic('realestate')">Real estate investing</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="step-label">02 — Fuel type</div>
+  <div class="pill-group" id="fuel-group">
+    <button class="pill" onclick="selectFuel('interest')">Interest</button>
+    <button class="pill" onclick="selectFuel('challenge')">Challenge</button>
+    <button class="pill" onclick="selectFuel('novelty')">Novelty</button>
+    <button class="pill" onclick="selectFuel('urgency')">Urgency</button>
+  </div>
+
+  <div id="card-area">
+    <div class="prompt-state">
+      <span class="prompt-glyph">&#x2014;</span>
+      <p class="prompt-text">Select a topic and fuel type above</p>
+    </div>
+  </div>
+
+  <div class="manage-section">
+    <button class="manage-toggle" onclick="toggleManage()">
+      <span id="manage-arrow">&#x25B6;</span>
+      Manage blocks
+    </button>
+    <div class="manage-body" id="manage-body" style="display:none;">
+
+      <div class="add-form">
+        <div class="form-row">
+          <select id="new-topic">
+            <option value="">Topic...</option>
+            <option value="writing">Writing</option>
+            <option value="editing">Editing</option>
+            <option value="realestate">Real estate investing</option>
+          </select>
+          <select id="new-fuel">
+            <option value="">Fuel...</option>
+            <option value="interest">Interest</option>
+            <option value="challenge">Challenge</option>
+            <option value="novelty">Novelty</option>
+            <option value="urgency">Urgency</option>
+          </select>
+        </div>
+        <input type="text" id="new-title" placeholder="Block title...">
+        <textarea id="new-desc" placeholder="Description..."></textarea>
+        <button class="btn-add" onclick="addBlock()">+ Add block</button>
+      </div>
+
+      <div class="list-filter" id="list-filter">
+        <button class="filter-btn active" onclick="setListFilter('all', this)">All</button>
+        <button class="filter-btn" onclick="setListFilter('writing', this)">Writing</button>
+        <button class="filter-btn" onclick="setListFilter('editing', this)">Editing</button>
+        <button class="filter-btn" onclick="setListFilter('realestate', this)">Real estate</button>
+        <button class="filter-btn" onclick="setListFilter('interest', this)">Interest</button>
+        <button class="filter-btn" onclick="setListFilter('challenge', this)">Challenge</button>
+        <button class="filter-btn" onclick="setListFilter('novelty', this)">Novelty</button>
+        <button class="filter-btn" onclick="setListFilter('urgency', this)">Urgency</button>
+      </div>
+
+      <div class="count-badge" id="count-badge"></div>
+      <div class="all-blocks-list" id="all-blocks-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SEED_BLOCKS = [
+  {id:'e1', topic:'editing', fuel:'interest', title:'Line edit your sharpest scene', desc:'Pick the scene you\'re most proud of — a confrontation, a reveal, a quiet dread moment. Polish the prose to match the tension already there.'},
+  {id:'e2', topic:'editing', fuel:'interest', title:'Line edit your antagonist\'s best moment', desc:'Find the scene where your antagonist is most themselves — most dangerous, most convincing, most human. These scenes are usually the most fun to inhabit and the easiest to improve.'},
+  {id:'e3', topic:'editing', fuel:'interest', title:'Polish the scene that scared you when you wrote it', desc:'The scenes that made you uncomfortable to write are usually the ones doing the most work. Go back and honor the discomfort with precise language.'},
+  {id:'e4', topic:'editing', fuel:'interest', title:'Deepen a piece of subtext you love', desc:'Find a moment where two characters are saying one thing and meaning another. Add one more layer — a gesture, a deflection, a line that means something different on a second read.'},
+  {id:'e5', topic:'editing', fuel:'interest', title:'Find your five best sentences and make them better', desc:'Read through the manuscript looking for the lines that already sing. Then spend the session making each one do even more — sharper verb, tighter image, better rhythm.'},
+  {id:'e6', topic:'editing', fuel:'interest', title:'Write the scene you\'ve been avoiding', desc:'Every thriller has one scene the writer keeps orbiting. Sit down and write it badly. A bad version beats a missing one.'},
+
+  {id:'e7', topic:'editing', fuel:'challenge', title:'Map one chapter\'s scene logic', desc:'Write a one-sentence summary of each scene in the chapter. Does each scene change something — a belief, a plan, a power dynamic? Cut or merge any that don\'t.'},
+  {id:'e8', topic:'editing', fuel:'challenge', title:'Fix the protagonist\'s throughline', desc:'Pull every scene where your protagonist makes a decision. Do they escalate across the book — or reset? Identify where the arc stalls and rewrite just that beat.'},
+  {id:'e9', topic:'editing', fuel:'challenge', title:'Audit your information reveals', desc:'List every chapter where the reader learns something new. Map them in order. Is the pacing building paranoia — or is too much revealed too early? Reorder or withhold as needed.'},
+  {id:'e10', topic:'editing', fuel:'challenge', title:'Track every scene where a character lies', desc:'Go through the manuscript and flag every moment of deception — including self-deception. Are the lies consistent with who each character is and what they need to protect? Do they pay off?'},
+  {id:'e11', topic:'editing', fuel:'challenge', title:'Stress-test your ending\'s setup', desc:'Work backwards from your ending. List every plot element the resolution depends on. Find the earliest point each one needs to be seeded. Then check whether it actually is.'},
+  {id:'e12', topic:'editing', fuel:'challenge', title:'Compress your slowest thirty pages', desc:'Find your thirty slowest pages, identify what work they\'re doing, and figure out how to do that work in twenty.'},
+  {id:'e13', topic:'editing', fuel:'challenge', title:'Map the power dynamic in every scene', desc:'For each scene, write who has power at the start and who has it at the end. If the answer is the same person every time, that\'s a structural problem — conflict needs to shift.'},
+
+  {id:'e14', topic:'editing', fuel:'novelty', title:'Read a chapter as a hostile reader', desc:'Pretend you bought this book expecting to dislike it. Annotate every moment you\'d skim, every line of dialogue that doesn\'t land, every time you\'d guess what\'s coming.'},
+  {id:'e15', topic:'editing', fuel:'novelty', title:'Write the pitch synopsis', desc:'Write a two-paragraph synopsis as if pitching to a true crime podcast producer — they want dread, stakes, and a hook. Wherever the pitch sounds thin, the structure needs work.'},
+  {id:'e16', topic:'editing', fuel:'novelty', title:'Do a reverse outline of one chapter', desc:'Without looking at the chapter, write down everything you remember happening in it and in what order. Then open the draft and compare. The gaps are where the chapter isn\'t landing.'},
+  {id:'e17', topic:'editing', fuel:'novelty', title:'Read three scenes aloud, cold', desc:'Pick three scenes you haven\'t touched recently and read them out loud at a normal speaking pace. Your mouth will catch what your eyes skip — awkward rhythm, repeated words, dead dialogue.'},
+  {id:'e18', topic:'editing', fuel:'novelty', title:'Write your villain\'s version of events', desc:'Write a first-person account of the story\'s events from the antagonist\'s perspective — their justifications, their grievances, their read on the protagonist. Don\'t edit. Just write their truth.'},
+  {id:'e19', topic:'editing', fuel:'novelty', title:'Read a chapter as a crime journalist', desc:'You\'re fact-checking this story. What doesn\'t add up? What would a skeptic push back on? What behavior feels unmotivated or too convenient? Note it all without fixing anything yet.'},
+  {id:'e20', topic:'editing', fuel:'novelty', title:'Rewrite one scene\'s opening line ten ways', desc:'Pick any scene that feels slow to start. Write ten different opening lines — different tones, entry points, levels of information. You won\'t use most of them. That\'s the point.'},
+
+  {id:'e21', topic:'editing', fuel:'urgency', title:'Close one open structural problem', desc:'Name one issue you\'ve been avoiding — a scene that doesn\'t belong, a subplot that goes nowhere. Set a hard stop. The goal is a decision, not perfection.'},
+  {id:'e22', topic:'editing', fuel:'urgency', title:'Line edit one full scene before lunch', desc:'Pick a scene, set a hard stop time, and finish the line edit before it hits. No restructuring — language only. Ship it clean.'},
+  {id:'e23', topic:'editing', fuel:'urgency', title:'Cut 500 words from one chapter', desc:'Pick a chapter and set a timer for 45 minutes. Your only job is to find and cut 500 words without the chapter losing anything essential. Track the word count as you go.'},
+  {id:'e24', topic:'editing', fuel:'urgency', title:'Decide the fate of every flagged scene', desc:'Go through your manuscript comments and make a keep/cut/rewrite call on every flagged scene before the session ends. No maybes. A wrong decision you can change beats paralysis.'},
+  {id:'e25', topic:'editing', fuel:'urgency', title:'Write the missing scene', desc:'You know the scene that needs to exist but doesn\'t yet. Set a 60-minute timer and write a complete first draft of it — beginning, middle, end — before it goes off.'},
+  {id:'e26', topic:'editing', fuel:'urgency', title:'Finish one chapter\'s line edits, full stop', desc:'Pick a chapter that\'s partially line-edited and commit to finishing it in this session. Not the whole book — one chapter, done. Mark it complete before you close the file.'},
+  {id:'e27', topic:'editing', fuel:'urgency', title:'Answer the three questions your reader will have by page 50', desc:'Write down the three biggest questions a reader will be asking by page 50. Then find — or plant — the answers somewhere in the first half. Do it before the session ends.'},
+
+  {id:'w1', topic:'writing', fuel:'interest', title:'Write the scene you\'ve been most excited about', desc:'The one you\'ve been mentally composing for weeks. Don\'t plan it further — just open a blank page and write it now.'},
+  {id:'w2', topic:'writing', fuel:'interest', title:'Give your protagonist one perfect line of dialogue', desc:'A single line that could only come from them, in this moment, under this pressure. Write the whole scene around making that line land.'},
+  {id:'w3', topic:'writing', fuel:'interest', title:'Write a scene entirely in subtext', desc:'Two characters want something from each other and neither says it directly. No internal monologue. Let the dialogue and action carry everything.'},
+  {id:'w4', topic:'writing', fuel:'interest', title:'Write your antagonist\'s most charming moment', desc:'Give them a scene where the reader genuinely likes them. If you can\'t write it, you don\'t know them well enough yet.'},
+  {id:'w5', topic:'writing', fuel:'interest', title:'Expand the scene that felt too short', desc:'Find a scene you rushed past. Slow it down — give it physical space, pause on a detail, let a silence breathe. See what emerges when you stop hurrying.'},
+  {id:'w6', topic:'writing', fuel:'interest', title:'Write a moment of unexpected tenderness', desc:'In the middle of tension or dread, find a small moment of genuine warmth between two characters. The contrast is one of the most powerful tools in dark fiction.'},
+
+  {id:'w7', topic:'writing', fuel:'challenge', title:'Write a scene with three simultaneous agendas', desc:'Put three characters in a room. Each one wants something different and is trying to get it without revealing what it is. Let them talk past each other and around each other.'},
+  {id:'w8', topic:'writing', fuel:'challenge', title:'Write the same event from two POVs', desc:'Take a scene you\'ve already written and write it again from the perspective of another character in the room. What do they notice? What do they misread?'},
+  {id:'w9', topic:'writing', fuel:'challenge', title:'Plant a clue without the protagonist noticing it', desc:'Write a scene where something significant is visible to a careful reader but your narrator glosses over it. The narrator\'s indifference is the disguise.'},
+  {id:'w10', topic:'writing', fuel:'challenge', title:'Write the moment before the inciting incident', desc:'The last ordinary moment. Your protagonist doesn\'t know what\'s coming. Make it feel completely normal — and in retrospect, completely ominous.'},
+  {id:'w11', topic:'writing', fuel:'challenge', title:'Write a conversation that is also a power struggle', desc:'Every line of dialogue either advances one character\'s agenda or concedes ground. Map who is winning and losing with each exchange.'},
+  {id:'w12', topic:'writing', fuel:'challenge', title:'Write a scene where the unreliable narrator contradicts themselves', desc:'Your narrator states something as fact early in a scene, then behaves in a way that quietly contradicts it. Don\'t flag it. Let it sit there.'},
+
+  {id:'w13', topic:'writing', fuel:'novelty', title:'Write today\'s session in a different tense or POV', desc:'If you\'re writing third-person past, try first-person present for one scene. You probably won\'t keep it — but you\'ll learn something about the character you wouldn\'t have otherwise.'},
+  {id:'w14', topic:'writing', fuel:'novelty', title:'Write one scene as stage directions only', desc:'No prose, no internal thoughts — just what a director would put in a script. What actions? What movement? What is visible? It forces you to show, not tell.'},
+  {id:'w15', topic:'writing', fuel:'novelty', title:'Write a scene with no dialogue at all', desc:'A character moves through a scene, makes observations, takes actions. Pure interiority and action. No talking. Find out what the scene is actually about when language is removed.'},
+  {id:'w16', topic:'writing', fuel:'novelty', title:'Write your protagonist\'s worst fear as a scene', desc:'Not a metaphor for it — the actual thing. Write it as if it\'s happening now. You may never use it, but you\'ll understand what drives them at a level you can\'t get any other way.'},
+  {id:'w17', topic:'writing', fuel:'novelty', title:'Steal a structural move from a book you love', desc:'Pick a specific technique from Gone Girl, Shutter Island, or The Housemaid — a POV shift, a withholding, a misdirection — and write a scene that uses the same move for your story.'},
+  {id:'w18', topic:'writing', fuel:'novelty', title:'Write the scene backwards', desc:'Start at the end of the scene and work towards its beginning. What does the ending reveal about how the scene should have started? Reverse-engineer the tension.'},
+
+  {id:'w19', topic:'writing', fuel:'urgency', title:'Write 1,000 words before you do anything else', desc:'No email, no coffee, no news. Open the file and write 1,000 words before your day starts. They don\'t have to be good. They have to exist.'},
+  {id:'w20', topic:'writing', fuel:'urgency', title:'Finish the scene you left half-written', desc:'You stopped in the middle of something. Set a timer for 45 minutes and finish it — get to the end of the scene, even if the middle is rough.'},
+  {id:'w21', topic:'writing', fuel:'urgency', title:'Write the chapter you\'ve been postponing', desc:'You know the one. Name it. Now open it and write it before lunch.'},
+  {id:'w22', topic:'writing', fuel:'urgency', title:'Write a complete scene in one sitting, no stopping', desc:'Pick a scene you\'ve been circling. Set a timer. Write it start to finish without lifting your hands from the keyboard. No going back, no editing, no pausing.'},
+  {id:'w23', topic:'writing', fuel:'urgency', title:'Hit your word count before 1pm', desc:'Set your daily target. Write it in the morning session, full stop. The afternoon is for everything else.'},
+  {id:'w24', topic:'writing', fuel:'urgency', title:'Write the ending — even a rough one', desc:'Even if you\'re nowhere near it in the draft, write the ending scene today. Having a destination changes how you write every scene leading to it.'},
+
+  {id:'r1', topic:'realestate', fuel:'interest', title:'Deep-dive a market you\'ve been curious about', desc:'Pick a city or neighborhood you\'ve been watching. Spend an hour going deep — recent sales, days on market, rent-to-price ratios. Follow your curiosity and see what the numbers say.'},
+  {id:'r2', topic:'realestate', fuel:'interest', title:'Find and analyze one deal that excites you', desc:'Pull a property from your watch list or a new listing that caught your eye. Run the full numbers — not because it\'s a priority, because you want to know.'},
+  {id:'r3', topic:'realestate', fuel:'interest', title:'Read one long-form piece on real estate strategy', desc:'Not news, not social media — a substantive article, case study, or book chapter on a strategy you find genuinely interesting. Take notes on what you\'d apply.'},
+  {id:'r4', topic:'realestate', fuel:'interest', title:'Revisit your best deal and reverse-engineer it', desc:'Pull up the numbers on a property that performed well. What made it work? What did you get right? Write down the three conditions that made it a good deal.'},
+  {id:'r5', topic:'realestate', fuel:'interest', title:'Explore one asset class you don\'t currently invest in', desc:'Mobile home parks, self-storage, short-term rentals, industrial — pick one you\'ve been curious about and spend the session understanding how the economics work.'},
+  {id:'r6', topic:'realestate', fuel:'interest', title:'Map your ideal portfolio five years out', desc:'Where do you want to be? What does the portfolio look like? Write it out concretely — number of doors, markets, asset classes, passive income. Then work backwards from it.'},
+
+  {id:'r7', topic:'realestate', fuel:'challenge', title:'Build a full underwriting model for a property you\'re considering', desc:'No shortcuts. Build the full model from scratch — purchase price, financing, income, all operating expenses, vacancy, capex reserves, debt service, cash-on-cash, IRR. Make a go/no-go call.'},
+  {id:'r8', topic:'realestate', fuel:'challenge', title:'Stress-test one of your current properties', desc:'Run your best-performing property through a worst-case scenario: rates spike, vacancy hits 20%, a major repair hits. Does it still work? What\'s the breaking point?'},
+  {id:'r9', topic:'realestate', fuel:'challenge', title:'Analyze a deal that didn\'t pencil and find why', desc:'Take a property you passed on or a deal that fell through. Build the model. Was your rejection right? Was there a structure or strategy that could have made it work?'},
+  {id:'r10', topic:'realestate', fuel:'challenge', title:'Audit your current portfolio\'s performance against projections', desc:'Pull your original underwriting for each property. Compare projected vs. actual rents, expenses, and cash flow. Where were you wrong and what does it mean for future underwriting?'},
+  {id:'r11', topic:'realestate', fuel:'challenge', title:'Build a capital stack for a deal you\'d need a partner for', desc:'Identify a deal that requires more capital than you have alone. Structure the partnership — equity splits, preferred returns, waterfalls, decision rights. Make it something you\'d actually pitch.'},
+  {id:'r12', topic:'realestate', fuel:'challenge', title:'Identify your next acquisition criteria in writing', desc:'Write a one-page investment thesis for your next deal — market, asset class, price range, minimum returns, non-negotiables. Be specific enough that you could hand it to a broker and have them bring you real options.'},
+  {id:'r13', topic:'realestate', fuel:'challenge', title:'Calculate your true cost of capital', desc:'What does it actually cost you to deploy capital right now — including opportunity cost, time, and risk premium? Does the deal you\'re looking at clear that bar?'},
+
+  {id:'r14', topic:'realestate', fuel:'novelty', title:'Call or text one operator in a market you\'re researching', desc:'Not an agent — a property manager, a local landlord, a contractor. Ask them what the market actually feels like right now. What would you never learn from a spreadsheet?'},
+  {id:'r15', topic:'realestate', fuel:'novelty', title:'Underwrite the same property using three different strategies', desc:'Buy-and-hold, BRRRR, and short-term rental. Run the numbers for each. Which works? Which doesn\'t? What does that tell you about the deal and the market?'},
+  {id:'r16', topic:'realestate', fuel:'novelty', title:'Walk (virtually or physically) a neighborhood you\'ve been underwriting', desc:'Street view, YouTube, or in person — see it the way a tenant would. Does the location match what the numbers suggested? What do you notice that you couldn\'t see in a spreadsheet?'},
+  {id:'r17', topic:'realestate', fuel:'novelty', title:'Find one counterintuitive data point about your target market', desc:'Look for something that contradicts the conventional wisdom — a neighborhood that\'s improving despite the narrative, a metric that tells a different story. What does it mean for your thesis?'},
+  {id:'r18', topic:'realestate', fuel:'novelty', title:'Write a one-page bear case for your favorite market', desc:'You believe in the market. Now write the strongest possible argument against it. What would have to be true for it to underperform? What are you not seeing?'},
+  {id:'r19', topic:'realestate', fuel:'novelty', title:'Talk to your property manager about what tenants are actually asking for', desc:'Not what you think they want — what they\'re asking for. What amenities, what features, what locations? Let the demand side inform your next acquisition.'},
+  {id:'r20', topic:'realestate', fuel:'novelty', title:'Find one deal that sold recently and figure out why it traded at that price', desc:'Pull a recent comp that surprised you — a price that seemed too high or too low. Research the buyer, the financing, the condition. Understand what they saw that you might have missed.'},
+
+  {id:'r21', topic:'realestate', fuel:'urgency', title:'Make a go/no-go decision on the deal you\'ve been sitting on', desc:'You\'ve been looking at this one long enough. Set a two-hour timer. Review the model, make a decision, and act on it — submit the offer or formally pass — before the timer goes off.'},
+  {id:'r22', topic:'realestate', fuel:'urgency', title:'Follow up with every warm lead before end of day', desc:'Anyone you\'ve talked to in the last 30 days about a deal, a partnership, or a market — reach out today. A single email or text. Don\'t let momentum die.'},
+  {id:'r23', topic:'realestate', fuel:'urgency', title:'Get one number you\'ve been avoiding getting', desc:'The repair estimate you haven\'t called for. The rate quote you haven\'t asked for. The rent comp you haven\'t pulled. Get it today. Uncertainty is expensive.'},
+  {id:'r24', topic:'realestate', fuel:'urgency', title:'Submit an LOI on a property before noon', desc:'If you\'ve been doing due diligence on something and you haven\'t made an offer yet — write and send the LOI this morning. Done is better than perfect.'},
+  {id:'r25', topic:'realestate', fuel:'urgency', title:'Clean out your deal pipeline — keep or kill every lead', desc:'Go through every active deal or lead in your pipeline. Make a keep/kill call on each one before the session ends. No maybes. A clean pipeline is a fast pipeline.'},
+  {id:'r26', topic:'realestate', fuel:'urgency', title:'Resolve one open item that\'s blocking a deal from closing', desc:'There\'s something you\'ve been waiting on or avoiding that\'s sitting between you and a closed deal. Identify it, make the call, send the email, get it done today.'},
+  {id:'r27', topic:'realestate', fuel:'urgency', title:'Schedule three property tours before the week ends', desc:'You can\'t analyze deals you haven\'t seen. Book three tours — at least one in a market or neighborhood outside your usual zone — before you close the laptop today.'},
+];
+
+const STORAGE_KEY = 'fuelblocks_v2';
+
+function loadBlocks() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(SEED_BLOCKS));
+}
+
+function saveBlocks(blocks) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(blocks));
+}
+
+let blocks = loadBlocks();
+let currentTopic = null;
+let currentFuel = null;
+let currentBlock = null;
+let listFilter = 'all';
+let manageOpen = false;
+
+function selectTopic(t) {
+  currentTopic = t;
+  document.querySelectorAll('#topic-group .pill').forEach(p => {
+    p.className = 'pill';
+    if (p.getAttribute('onclick') === `selectTopic('${t}')`) p.classList.add('active-topic');
+  });
+  render();
+}
+
+function selectFuel(f) {
+  currentFuel = f;
+  document.querySelectorAll('#fuel-group .pill').forEach(p => {
+    p.className = 'pill';
+    if (p.getAttribute('onclick') === `selectFuel('${f}')`) p.classList.add(`active-${f}`);
+  });
+  render();
+}
+
+function getPool() {
+  if (!currentTopic || !currentFuel) return [];
+  return blocks.filter(b => b.topic === currentTopic && b.fuel === currentFuel);
+}
+
+function render() {
+  const area = document.getElementById('card-area');
+  if (!currentTopic || !currentFuel) {
+    area.innerHTML = `<div class="prompt-state"><span class="prompt-glyph">&mdash;</span><p class="prompt-text">Select a topic and fuel type above</p></div>`;
+    return;
+  }
+  const pool = getPool();
+  if (pool.length === 0) {
+    area.innerHTML = `<div class="empty-state"><div class="empty-title">No blocks here yet</div><p class="empty-desc">Add some below using the Manage blocks section.</p></div>`;
+    return;
+  }
+  if (!currentBlock || !pool.find(b => b.id === currentBlock.id)) {
+    currentBlock = pool[Math.floor(Math.random() * pool.length)];
+  }
+  const b = currentBlock;
+  const fuelLabel = {interest:'Interest block', challenge:'Challenge block', novelty:'Novelty block', urgency:'Urgency block'}[b.fuel];
+  area.innerHTML = `
+    <div class="card-wrap">
+      <div class="block-card card-${b.fuel}">
+        <div class="card-fuel-tag tag-${b.fuel}"><span class="tag-dot"></span>${fuelLabel}</div>
+        <div class="block-title">${b.title}</div>
+        <div class="block-desc">${b.desc}</div>
+        <div class="card-actions">
+          <button class="btn btn-refresh" onclick="refresh()">&#x21BA; New block</button>
+          <button class="btn btn-remove" onclick="removeCurrentBlock()">&#x2715; Remove this block</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function refresh() {
+  const pool = getPool();
+  if (pool.length <= 1) { render(); return; }
+  let candidates = pool.filter(b => !currentBlock || b.id !== currentBlock.id);
+  currentBlock = candidates[Math.floor(Math.random() * candidates.length)];
+  render();
+}
+
+function removeCurrentBlock() {
+  if (!currentBlock) return;
+  if (!confirm(`Remove "${currentBlock.title}" permanently?`)) return;
+  blocks = blocks.filter(b => b.id !== currentBlock.id);
+  saveBlocks(blocks);
+  currentBlock = null;
+  render();
+  if (manageOpen) renderList();
+}
+
+function toggleManage() {
+  manageOpen = !manageOpen;
+  document.getElementById('manage-body').style.display = manageOpen ? 'block' : 'none';
+  document.getElementById('manage-arrow').innerHTML = manageOpen ? '&#x25BC;' : '&#x25B6;';
+  if (manageOpen) renderList();
+}
+
+function addBlock() {
+  const topic = document.getElementById('new-topic').value;
+  const fuel = document.getElementById('new-fuel').value;
+  const title = document.getElementById('new-title').value.trim();
+  const desc = document.getElementById('new-desc').value.trim();
+  if (!topic || !fuel || !title || !desc) { alert('Please fill in all fields.'); return; }
+  const newBlock = { id: 'u_' + Date.now(), topic, fuel, title, desc };
+  blocks.push(newBlock);
+  saveBlocks(blocks);
+  document.getElementById('new-topic').value = '';
+  document.getElementById('new-fuel').value = '';
+  document.getElementById('new-title').value = '';
+  document.getElementById('new-desc').value = '';
+  renderList();
+  if (currentTopic === topic && currentFuel === fuel) render();
+}
+
+function setListFilter(f, el) {
+  listFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderList();
+}
+
+function removeBlock(id) {
+  const b = blocks.find(x => x.id === id);
+  if (!b) return;
+  if (!confirm(`Remove "${b.title}" permanently?`)) return;
+  blocks = blocks.filter(x => x.id !== id);
+  saveBlocks(blocks);
+  if (currentBlock && currentBlock.id === id) { currentBlock = null; render(); }
+  renderList();
+}
+
+const fuelColors = { interest:'#4a9e7a', challenge:'#7b6fd4', novelty:'#c97a4a', urgency:'#c4943a' };
+const topicLabel = { writing:'Writing', editing:'Editing', realestate:'Real estate' };
+const fuelLabel2 = { interest:'Interest', challenge:'Challenge', novelty:'Novelty', urgency:'Urgency' };
+
+function renderList() {
+  const filtered = blocks.filter(b => {
+    if (listFilter === 'all') return true;
+    return b.topic === listFilter || b.fuel === listFilter;
+  });
+  document.getElementById('count-badge').textContent = filtered.length + ' block' + (filtered.length !== 1 ? 's' : '');
+  const list = document.getElementById('all-blocks-list');
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:12px 0;">No blocks match this filter.</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(b => `
+    <div class="list-item">
+      <span class="list-dot" style="background:${fuelColors[b.fuel]}"></span>
+      <span class="list-meta">${topicLabel[b.topic]} / ${fuelLabel2[b.fuel]}</span>
+      <span class="list-title">${b.title}</span>
+      <button class="list-remove" onclick="removeBlock('${b.id}')" title="Remove">&#x2715;</button>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>
